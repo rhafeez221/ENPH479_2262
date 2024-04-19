@@ -1,0 +1,27 @@
+clear variables; 
+
+syms Tc(t) V(t); 
+
+Th = 300; % hotside temp in K
+m = 0.1; % mass of aluminum in kg
+c = 921.096; % specific heat of Al in J/kg.K
+
+Sm = 0.05133;
+Rm = 1.40110;
+Km = 0.74433;
+
+% model below incorporates the conversion from current to voltage, which
+% accounts for the Tc term in the voltage definition
+
+ode = diff(Tc, t) == (Sm^2 / (2*Rm*m*c))*Tc^2 + (Km/(m*c))*Tc + (1/(m*c*Rm))*(V*Sm*Th - 0.5*V^2 - 0.5*Sm^2*Th^2 - Km*Rm*Th);
+
+cond1 = Tc(0) == Th;
+cond2 = V(0) == 0;
+conds = [cond1 cond2];
+
+tspan = [0 2000];
+
+[VF, subs] = odeToVectorField(ode)
+odefcn = matlabFunction(VF, 'Vars', {t,V})
+
+%[t, Tc] = ode45(@ode, tspan, conds)
